@@ -30,13 +30,13 @@ export default function Homepage() {
   return (
     <>
       {/* Navbar */}
-      <header className="absolute top-0 left-0 w-full z-50">
-        <div className="flex items-center justify-between px-6 md:px-16 py-6">
+      <header className="bg-black/10 fixed top-0 left-0 w-full z-50 backdrop-blur">
+        <div className="flex items-center justify-between px-6 md:px-16 py-4">
           <div className="flex items-center gap-10">
-            <button className="text-white text-2xl">
+            <button className="text-white hover:text-teal-600 transition-colors">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="h-7 w-7"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -44,49 +44,41 @@ export default function Homepage() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth="2"
+                  strokeWidth="1.5"
                   d="M4 6h16M4 12h16M4 18h16"
                 />
               </svg>
             </button>
-            <nav className="hidden md:flex items-center gap-8 text-white font-semibold tracking-wide text-base">
-              <a href="#" className="hover:text-cyan-300">
-                HOME
+            <nav className="hidden md:flex items-center gap-8 text-white font-medium tracking-wide text-sm uppercase">
+              <a href="homepage" className="hover:text-teal-600 transition-colors duration-300">
+                Home
               </a>
-              <a href="#" className="hover:text-cyan-300">
-                TOURS
+              <a href="gallery" className="hover:text-teal-600 transition-colors duration-300">
+                Gallery
               </a>
-              <a href="#" className="hover:text-cyan-300">
-                PACKAGES
+              <a href="booking" className="hover:text-teal-600 transition-colors duration-300">
+                Tours
               </a>
             </nav>
           </div>
 
-          <div className="text-center">
+          <div className="py-5 absolute left-1/2 transform -translate-x-1/2">
             <img src="/logo.png" alt="Palawan Tours" className="h-20 mx-auto" />
           </div>
 
-          <div>
+          <div className="relative group">
             <a
-              href="/"
-              className="bg-brand-cyan hover:text-cyan-100 hover:bg-cyan-600 text-white font-bold px-6 py-3 rounded-full shadow-md flex items-center gap-2 transition"
+              href="#"
+              className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white font-bold p-3 md:px-6 md:py-3 rounded-full shadow-md flex items-center gap-2 transition"
+              aria-label="Book Now"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-                className="w-4 h-4 md:w-6 md:h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 12l14-7-7 14-2-5-5-2z"
-                />
-              </svg>
-              BOOK NOW
+              <FaClipboardCheck className="text-lg" />
+              <span className="hidden md:inline">BOOK NOW</span>
             </a>
+            {/* Tooltip for mobile */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none md:hidden">
+              BOOK NOW
+            </div>
           </div>
         </div>
       </header>

@@ -40,6 +40,11 @@ Route::get('/bookingpage', function () {
     return Inertia::render('BookingPage');
 })->middleware(['auth', 'verified'])->name('bookingpage');
 
+// Gallery
+Route::get('/gallery', function () {
+    return Inertia::render('Gallery');
+})->middleware(['auth', 'verified'])->name('gallery');
+
 // Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
