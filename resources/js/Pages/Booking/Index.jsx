@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Head, useForm, router } from "@inertiajs/react";
+import { FaClipboardCheck } from "react-icons/fa";
 
 /* ------------------ Calendar Component ------------------ */
-// Renders a simple month view and only allows clicking on available dates.
 function Calendar({ availableDates = [], value, onChange }) {
   const available = useMemo(() => new Set(availableDates), [availableDates]);
   const [cursor, setCursor] = useState(() => {
@@ -10,65 +10,68 @@ function Calendar({ availableDates = [], value, onChange }) {
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
 
-  const monthKey = `${cursor.getFullYear()}-${cursor.getMonth() + 1}`;
   const start = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
   const end = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0);
-  const days = [];
-  for (let i = 1; i <= end.getDate(); i++) {
-    const iso = new Date(cursor.getFullYear(), cursor.getMonth(), i)
+  const days = Array.from({ length: end.getDate() }, (_, i) => {
+    const iso = new Date(cursor.getFullYear(), cursor.getMonth(), i + 1)
       .toISOString()
       .slice(0, 10);
-    days.push({ d: i, iso, enabled: available.has(iso) });
-  }
+    return { d: i + 1, iso, enabled: available.has(iso) };
+  });
 
-  const pad = (start.getDay() + 6) % 7; // Monday = 0
-  const weeks = [];
+  const pad = (start.getDay() + 6) % 7;
+  const rows = [];
   let row = Array(pad).fill(null);
-  days.forEach((cell) => {
+  for (const cell of days) {
     row.push(cell);
     if (row.length === 7) {
-      weeks.push(row);
+      rows.push(row);
       row = [];
     }
-  });
-  if (row.length) {
-    while (row.length < 7) row.push(null);
-    weeks.push(row);
   }
+  if (row.length) while (row.length < 7) row.push(null), rows.push(row);
 
-  const prev = () => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1));
-  const next = () => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1));
+  const prev = () =>
+    setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1));
+  const next = () =>
+    setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1));
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <button className="px-2 py-1 border rounded" onClick={prev}>
+    <div className="bg-white rounded-xl p-4 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={prev}
+          className="px-2 py-1 rounded hover:bg-gray-100 text-gray-700"
+        >
           ←
         </button>
-        <div className="font-medium">
+        <div className="font-semibold text-gray-800">
           {cursor.toLocaleString(undefined, { month: "long", year: "numeric" })}
         </div>
-        <button className="px-2 py-1 border rounded" onClick={next}>
+        <button
+          onClick={next}
+          className="px-2 py-1 rounded hover:bg-gray-100 text-gray-700"
+        >
           →
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-xs text-gray-600 mb-1">
+      <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 mb-1">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((x) => (
-          <div key={x} className="text-center">
+          <div key={x} className="text-center uppercase tracking-wide">
             {x}
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-7 gap-1">
-        {weeks.flatMap((week, wi) =>
+        {rows.flatMap((week, wi) =>
           week.map((cell, ci) => {
             if (!cell)
               return (
                 <div
                   key={`${wi}-${ci}`}
-                  className="h-10 border rounded bg-gray-50"
+                  className="h-10 rounded border bg-gray-50"
                 ></div>
               );
             const selected = value === cell.iso;
@@ -77,12 +80,13 @@ function Calendar({ availableDates = [], value, onChange }) {
                 key={cell.iso}
                 disabled={!cell.enabled}
                 onClick={() => onChange(cell.iso)}
-                className={`h-10 rounded border text-sm ${
-                  cell.enabled
-                    ? "bg-white hover:bg-gray-50"
+                className={`h-10 rounded text-sm transition-all border ${
+                  selected
+                    ? "bg-brand-green/10 ring-2 ring-brand-green font-bold"
+                    : cell.enabled
+                    ? "hover:bg-brand-green/5 bg-white"
                     : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                } ${selected ? "ring-2 ring-gray-900" : ""}`}
-                title={cell.iso}
+                }`}
               >
                 {cell.d}
               </button>
@@ -91,15 +95,14 @@ function Calendar({ availableDates = [], value, onChange }) {
         )}
       </div>
 
-      <div className="text-xs text-gray-600 mt-2">
-        Only the highlighted dates are clickable (available).
-      </div>
+      <p className="text-xs text-gray-500 mt-2 italic">
+        Only highlighted dates are available.
+      </p>
     </div>
   );
 }
 
 /* ------------------ Booking Page ------------------ */
-
 export default function BookingIndex({
   packages = [],
   availableDates = [],
@@ -149,202 +152,274 @@ export default function BookingIndex({
   };
 
   return (
-    <div className="min-h-screen p-6 max-w-5xl mx-auto">
-      <Head title="Book Now" />
-      <h1 className="text-3xl font-bold mb-6">Book Your Experience</h1>
-
-      {/* Steps indicator */}
-      <div className="flex items-center gap-2 text-sm mb-6">
-        <span className={`px-2 py-1 rounded ${currentStep === 1 ? "bg-gray-800 text-white" : "bg-gray-200"}`}>
-          Step 1: Choose Package
-        </span>
-        <span>→</span>
-        <span className={`px-2 py-1 rounded ${currentStep === 2 ? "bg-gray-800 text-white" : "bg-gray-200"}`}>
-          Step 2: Date & Details
-        </span>
-        <span>→</span>
-        <span className={`px-2 py-1 rounded ${currentStep === 3 ? "bg-gray-800 text-white" : "bg-gray-200"}`}>
-          Step 3: Payment
-        </span>
-      </div>
-
-      {/* Step 1: Choose package */}
-      {currentStep === 1 && (
-        <section className="grid md:grid-cols-2 gap-4">
-          {packages.map((p) => (
-            <div key={p.id} className="border rounded-xl overflow-hidden">
-              {p.image_url && (
-                <img src={p.image_url} alt={p.name} className="w-full h-40 object-cover" />
-              )}
-              <div className="p-4">
-                <h2 className="text-xl font-semibold">{p.name}</h2>
-                <div className="text-sm text-gray-600">
-                  {p.days} Days & {p.nights} Nights • Min {p.min_pax} pax
+    <>
+      {/* Navbar */}
+      <header className="bg-gradient-to-br from-gray-900 to-black/20 fixed top-0 left-0 w-full z-50 backdrop-blur">
+              <div className="flex items-center justify-between px-6 md:px-16 py-4">
+                <div className="flex items-center gap-10">
+                  <button className="text-white hover:text-teal-600 transition-colors">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-7 w-7"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
+                    </svg>
+                  </button>
+                  <nav className="hidden md:flex items-center gap-8 text-white font-medium tracking-wide text-sm uppercase">
+                    <a href="homepage" className="hover:text-teal-600 transition-colors duration-300">
+                      Home
+                    </a>
+                    <a href="gallery" className="hover:text-teal-600 transition-colors duration-300">
+                      Gallery
+                    </a>
+                    <a href="booking" className="hover:text-teal-600 transition-colors duration-300">
+                      Tours
+                    </a>
+                  </nav>
                 </div>
-                <div className="mt-2 text-sm">
-                  ₱{Number(p.price_per_head ?? 0).toLocaleString()}{" "}
-                  <span className="text-gray-600">/ per head</span>
+      
+                <div className="py-5 absolute left-1/2 transform -translate-x-1/2">
+                  <img src="/logo.png" alt="Palawan Tours" className="h-20 mx-auto" />
                 </div>
-                {p.description && (
-                  <p className="text-sm text-gray-700 mt-2">{p.description}</p>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 text-sm">
-                  <div>
-                    <div className="font-medium">Inclusions</div>
-                    <ul className="list-disc pl-5">
-                      {(p.inclusions || []).map((x, i) => (
-                        <li key={i}>{x}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <div className="font-medium">Exclusions</div>
-                    <ul className="list-disc pl-5">
-                      {(p.exclusions || []).map((x, i) => (
-                        <li key={i}>{x}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <div className="font-medium">Add-ons</div>
-                    <ul className="list-disc pl-5">
-                      {(p.add_ons || []).map((x, i) => (
-                        <li key={i}>{x}</li>
-                      ))}
-                    </ul>
+      
+                <div className="relative group">
+                  <a
+                    href="#"
+                    className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white font-bold p-3 md:px-6 md:py-3 rounded-full shadow-md flex items-center gap-2 transition"
+                    aria-label="Book Now"
+                  >
+                    <FaClipboardCheck className="text-lg" />
+                    <span className="hidden md:inline">BOOK NOW</span>
+                  </a>
+                  {/* Tooltip for mobile */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none md:hidden">
+                    BOOK NOW
                   </div>
                 </div>
+              </div>
+            </header>
 
-                <button
-                  className="mt-4 px-4 py-2 rounded-xl bg-gray-900 text-white"
-                  onClick={() => {
-                    setSelectedPackage(p);
-                    setCurrentStep(2);
-                  }}
+      {/* Main Content */}
+      <main className="flex flex-col min-h-screen bg-[#EFE9DF] text-gray-800 pt-28">
+        <section className="flex-grow max-w-5xl mx-auto py-5 px-6">
+          <Head title="Book Now" />
+
+          <h1 className="text-4xl font-extrabold mb-8 text-brand-blue text-center">
+            Book Your Experience
+          </h1>
+
+          {/* Steps */}
+          <div className="flex justify-center md:justify-start items-center gap-2 text-sm mb-8">
+            {["Choose Package", "Date & Details", "Payment"].map((label, i) => {
+              const stepNum = i + 1;
+              const active = currentStep === stepNum;
+              return (
+                <React.Fragment key={i}>
+                  <span
+                    className={`px-3 py-1.5 rounded-full transition-all ${
+                      active
+                        ? "bg-gray-800 text-white font-medium shadow"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    Step {stepNum}: {label}
+                  </span>
+                  {stepNum < 3 && <span>→</span>}
+                </React.Fragment>
+              );
+            })}
+          </div>
+
+          {/* Step 1 */}
+          {currentStep === 1 && (
+            <div className="grid md:grid-cols-2 gap-6">
+              {packages.map((p) => (
+                <div
+                  key={p.id}
+                  className="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden border"
                 >
-                  Select
+                  {p.image_url && (
+                    <img
+                      src={p.image_url}
+                      alt={p.name}
+                      className="w-full h-48 object-cover"
+                    />
+                  )}
+                  <div className="p-5">
+                    <h2 className="text-xl font-semibold text-brand-blue mb-1">
+                      {p.name}
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      {p.days}D / {p.nights}N • Min {p.min_pax} pax
+                    </p>
+                    <p className="mt-2 text-lg font-medium text-brand-green">
+                      ₱{Number(p.price_per_head ?? 0).toLocaleString()}
+                      <span className="text-gray-600 text-sm font-normal">
+                        {" "}
+                        / per head
+                      </span>
+                    </p>
+                    {p.description && (
+                      <p className="text-sm text-gray-700 mt-2">
+                        {p.description}
+                      </p>
+                    )}
+                    <button
+                      onClick={() => {
+                        setSelectedPackage(p);
+                        setCurrentStep(2);
+                      }}
+                      className="mt-5 px-5 py-2 rounded-xl bg-brand-green text-white hover:bg-brand-green/90 transition w-full font-semibold"
+                    >
+                      Select Package
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Step 2 */}
+          {currentStep === 2 && (
+            <form
+              className="grid md:grid-cols-2 gap-6 mt-4"
+              onSubmit={onSubmitStep2}
+            >
+              <div className="md:col-span-2">
+                <label className="text-sm font-semibold text-gray-700 mb-2 block">
+                  Select an Available Date
+                </label>
+                <Calendar
+                  availableDates={availableDates}
+                  value={data.booking_date}
+                  onChange={(iso) => setData("booking_date", iso)}
+                />
+                {errors.booking_date && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.booking_date}
+                  </p>
+                )}
+              </div>
+
+              <div className="p-5 bg-white rounded-xl shadow border">
+                <h3 className="font-semibold mb-3 text-brand-blue text-sm">
+                  Your Details
+                </h3>
+                <input
+                  placeholder="Full Name"
+                  className="w-full border rounded p-2 mb-2"
+                  value={data.customer_name}
+                  onChange={(e) => setData("customer_name", e.target.value)}
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="w-full border rounded p-2 mb-2"
+                  value={data.customer_email}
+                  onChange={(e) => setData("customer_email", e.target.value)}
+                  required
+                />
+                <input
+                  placeholder="Phone Number"
+                  className="w-full border rounded p-2"
+                  value={data.customer_phone}
+                  onChange={(e) => setData("customer_phone", e.target.value)}
+                />
+              </div>
+
+              <div className="p-5 bg-white rounded-xl shadow border">
+                <h3 className="font-semibold mb-3 text-brand-blue text-sm">
+                  Booking Info
+                </h3>
+                <input
+                  type="number"
+                  min="1"
+                  className="w-full border rounded p-2 mb-2"
+                  placeholder="Number of People"
+                  value={data.num_people}
+                  onChange={(e) => setData("num_people", Number(e.target.value))}
+                  required
+                />
+                <input
+                  className="w-full border rounded p-2 bg-gray-50 text-gray-700"
+                  value={selectedPackage ? selectedPackage.name : ""}
+                  disabled
+                />
+              </div>
+
+              <div className="md:col-span-2 flex justify-between">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  className="px-5 py-2 rounded-xl border bg-white hover:bg-gray-100"
+                >
+                  ← Back
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-brand-green text-white hover:bg-brand-green/90 font-semibold"
+                  disabled={processing}
+                >
+                  Continue to Payment →
                 </button>
               </div>
-            </div>
-          ))}
-        </section>
-      )}
+            </form>
+          )}
 
-      {/* Step 2: Date + details */}
-      {currentStep === 2 && (
-        <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={onSubmitStep2}>
-          <div className="md:col-span-2 p-4 border rounded-xl">
-            <div className="text-sm font-medium mb-2">Select an available date</div>
-            <Calendar
-              availableDates={availableDates}
-              value={data.booking_date}
-              onChange={(iso) => setData("booking_date", iso)}
-            />
-            {!!errors.booking_date && (
-              <p className="text-red-600 text-sm mt-1">{errors.booking_date}</p>
-            )}
-          </div>
-
-          <div className="p-4 border rounded-xl">
-            <div className="text-sm font-medium mb-2">Your Details</div>
-            <label className="block text-sm">Full name</label>
-            <input
-              className="w-full border rounded p-2 mb-2"
-              value={data.customer_name}
-              onChange={(e) => setData("customer_name", e.target.value)}
-              required
-            />
-
-            <label className="block text-sm">Email</label>
-            <input
-              type="email"
-              className="w-full border rounded p-2 mb-2"
-              value={data.customer_email}
-              onChange={(e) => setData("customer_email", e.target.value)}
-              required
-            />
-
-            <label className="block text-sm">Phone</label>
-            <input
-              className="w-full border rounded p-2 mb-2"
-              value={data.customer_phone}
-              onChange={(e) => setData("customer_phone", e.target.value)}
-            />
-          </div>
-
-          <div className="p-4 border rounded-xl">
-            <div className="text-sm font-medium mb-2">Booking Info</div>
-            <label className="block text-sm">Number of people</label>
-            <input
-              type="number"
-              min="1"
-              className="w-full border rounded p-2 mb-2"
-              value={data.num_people}
-              onChange={(e) => setData("num_people", Number(e.target.value))}
-              required
-            />
-
-            <label className="block text-sm">Selected Package</label>
-            <input
-              className="w-full border rounded p-2 mb-2 bg-gray-50"
-              value={selectedPackage ? selectedPackage.name : ""}
-              disabled
-            />
-          </div>
-
-          <div className="md:col-span-2 flex gap-2">
-            <button
-              type="button"
-              className="px-4 py-2 rounded-xl border"
-              onClick={() => setCurrentStep(1)}
-            >
-              Back
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl bg-gray-900 text-white"
-              disabled={processing}
-            >
-              Continue to Payment
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Step 3: Payment */}
-      {currentStep === 3 && (
-        <section className="mt-4 p-4 border rounded-xl">
-          <h2 className="text-xl font-semibold">Payment</h2>
-          {status === "paid" ? (
-            <div className="mt-2 p-3 bg-green-100 rounded">
-              ✅ Payment received. Your booking is confirmed!
-            </div>
-          ) : (
-            <>
-              <p className="text-sm text-gray-600 mt-1">
-                This is a mock payment screen. Enter any number and click Pay.
-              </p>
-              <form className="mt-4" onSubmit={mockPay}>
-                <label className="block text-sm">Card Number (mock)</label>
-                <input
-                  className="border rounded p-2 w-full max-w-md"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                />
-                <div className="mt-3">
-                  <button
-                    className="px-4 py-2 rounded-xl bg-gray-900 text-white"
-                    disabled={paying}
-                  >
-                    {paying ? "Processing..." : "Pay Now (Mock)"}
-                  </button>
+          {/* Step 3 */}
+          {currentStep === 3 && (
+            <section className="mt-6 p-6 bg-white rounded-xl shadow border max-w-lg mx-auto text-center">
+              <h2 className="text-xl font-bold text-brand-blue mb-4">Payment</h2>
+              {status === "paid" ? (
+                <div className="p-3 bg-green-100 rounded text-green-800 font-medium">
+                  ✅ Payment received. Your booking is confirmed!
                 </div>
-              </form>
-            </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600">
+                    This is a mock payment. Enter any number and click Pay.
+                  </p>
+                  <form onSubmit={mockPay} className="mt-4">
+                    <input
+                      className="border rounded p-2 w-full max-w-md mb-3"
+                      placeholder="Card Number (Mock)"
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value)}
+                    />
+                    <button
+                      className="px-5 py-2 rounded-xl bg-brand-green text-white hover:bg-brand-green/90 font-semibold"
+                      disabled={paying}
+                    >
+                      {paying ? "Processing..." : "Pay Now (Mock)"}
+                    </button>
+                  </form>
+                </>
+              )}
+            </section>
           )}
         </section>
-      )}
-    </div>
+
+        {/* Footer */}
+        <footer className="bg-brand-blue text-white py-10 text-center mt-auto">
+          <h3 className="text-xl font-semibold">Palawan Adventures</h3>
+          <p className="text-sm text-white/80 mt-2">
+            Your tropical escape awaits — book your next adventure today.
+          </p>
+          <p className="mt-4 text-xs text-white/60">
+            © {new Date().getFullYear()} Palawan Adventures. All rights
+            reserved.
+          </p>
+        </footer>
+      </main>
+    </>
   );
 }

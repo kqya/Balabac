@@ -263,7 +263,7 @@ const TourCard = ({ pkg }) => {
             ₱{pkg.price.toLocaleString()}{" "}
             <span className="text-sm text-gray-600">/ head</span>
           </p>
-          <button className="mt-2 px-5 py-1.5 bg-teal-500 text-white rounded-full font-semibold shadow hover:bg-teal-600 text-sm transition flex items-center gap-2">
+          <button href="/booking" className="mt-2 px-5 py-1.5 bg-teal-500 text-white rounded-full font-semibold shadow hover:bg-teal-600 text-sm transition flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
