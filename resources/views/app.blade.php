@@ -16,12 +16,12 @@
         @viteReactRefresh
         @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
         @inertiaHead
+
+        <!-- ✅ CSRF Token (placed AFTER @inertiaHead so it stays in the DOM) -->
+        <meta name="csrf-token" content="{{ csrf_token() }}">
     </head>
+
     <body class="font-sans antialiased">
         @inertia
-
-        <div id="app"></div>
-        @vite('resources/js/app.jsx')
-
     </body>
 </html>

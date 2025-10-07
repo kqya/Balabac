@@ -4,12 +4,13 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// ✅ IMPORT YOUR CONTROLLERS
+// ✅ Import controllers
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\PackageController;
-use App\Http\Controllers\Admin\BlackoutDateController;
+use App\Http\Controllers\Admin\AvailabilityController;
 use App\Http\Controllers\Admin\BookingAdminController;
+use App\Http\Controllers\Admin\DashboardController; // make sure this is at the top with your other use lines
 
 /*
 |--------------------------------------------------------------------------
@@ -58,18 +59,29 @@ Route::post('/booking', [BookingController::class, 'store'])->name('booking.stor
 Route::post('/booking/{booking}/confirm', [BookingController::class, 'confirm'])->name('booking.confirm');
 
 // Admin (protect with auth/verified)
+// Admin (protect with auth/verified)
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Bookings (read-only list)
     Route::get('/bookings', [BookingAdminController::class, 'index'])->name('bookings.index');
 
+    // Packages management
     Route::get('/packages', [PackageController::class, 'index'])->name('packages.index');
     Route::post('/packages', [PackageController::class, 'store'])->name('packages.store');
     Route::patch('/packages/{package}', [PackageController::class, 'update'])->name('packages.update');
     Route::delete('/packages/{package}', [PackageController::class, 'destroy'])->name('packages.destroy');
 
-    Route::get('/availability', [BlackoutDateController::class, 'index'])->name('availability.index');
-    Route::post('/availability', [BlackoutDateController::class, 'store'])->name('availability.store');
-    Route::delete('/availability/{availability}', [BlackoutDateController::class, 'destroy'])->name('availability.destroy');
+    // 🔐 Image upload endpoint (POST) — this is the one your uploader calls
+    Route::post('/packages/upload-image', [PackageController::class, 'uploadImage'])->name('packages.upload');
+
+    // Available Dates (Availability)
+    Route::get('/availability', [AvailabilityController::class, 'index'])->name('availability.index');
+    Route::post('/availability', [AvailabilityController::class, 'store'])->name('availability.store');
+    Route::delete('/availability/{availability}', [AvailabilityController::class, 'destroy'])->name('availability.destroy');
 });
+
 
 // Auth routes (Breeze/Fortify/etc.)
 require __DIR__ . '/auth.php';
