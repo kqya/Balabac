@@ -6,26 +6,73 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 export default function Homepage() {
   const packages = [
     {
-      title: "Balabac Tour Package A",
+      title: "Balabac 4D3N",
       days: "4 Days / 3 Nights",
       price: 17000,
+      location: "Balabac",
+      subtitle: "Maximum of 8 pax",
       images: [
         "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
         "https://images.unsplash.com/photo-1538132787915-ff0a2f7e3c4a",
         "https://images.unsplash.com/photo-1493558103817-58b2924bce98",
       ],
+      inclusions: [
+        "3 nights at Tatak Balabac Beach Camp (airconditioned twin-share)",
+        "Full board meals (breakfast, lunch, dinner)",
+        "Van + speedboat transfer (PPC ↔ Balabac)",
+        "Island hopping, all island fees",
+      ],
+      exclusions: [
+        "International & domestic flights",
+        "Hotel in Puerto Princesa",
+        "Snorkeling gears",
+        "Personal expenses & optional activities",
+      ],
+      addons: [
+        "Meal (cooked to order)",
+        "Muslim food delicacies",
+        "Fresh lobster / fish picking",
+        "Private romantic dinner at the beach",
+      ],
     },
     {
-      title: "Balabac Tour Package B",
-      days: "5 Days / 4 Nights",
+      title: "Balabac 3D2N",
+      days: "3 Days / 2 Nights",
       price: 16000,
+      location: "Balabac",
+      subtitle: "Maximum of 10 pax",
       images: [
         "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
         "https://images.unsplash.com/photo-1529686342540-1b43aec0df75",
         "https://images.unsplash.com/photo-1594485770512-f206820b7cc1",
       ],
+      inclusions: [
+        "2 nights at Tatak Balabac Beach Camp (airconditioned twin-share)",
+        "Full board meals",
+        "Van + speedboat transfer (PPC ↔ Balabac)",
+        "Island hopping, all island fees",
+      ],
+      exclusions: [
+        "International & domestic flights",
+        "Hotel in Puerto Princesa",
+        "Snorkeling gears",
+        "Personal expenses & optional activities",
+      ],
+      addons: [
+        "Meal (cooked to order) & Muslim food delicacies",
+        "Fresh lobster / fish picking",
+        "Private romantic dinner at the beach",
+      ],
     },
   ];
+
+  const [selectedLocation, setSelectedLocation] = useState("All");
+  const locations = ["All", "Balabac", "El Nido", "Coron"];
+
+  const filteredPackages =
+    selectedLocation === "All"
+      ? packages
+      : packages.filter((p) => p.location === selectedLocation);
 
   return (
     <>
@@ -75,7 +122,6 @@ export default function Homepage() {
               <FaClipboardCheck className="text-lg" />
               <span className="hidden md:inline">BOOK NOW</span>
             </a>
-            {/* Tooltip for mobile */}
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none md:hidden">
               BOOK NOW
             </div>
@@ -94,7 +140,6 @@ export default function Homepage() {
       </section>
 
       <main className="bg-[#EFE9DF] text-gray-800">
-        {/* A tropical, barefoot paradise */}
         <section className="text-center mt-5 py-5 px-4">
           <h2 className="text-brand-blue font-bold text-4xl">
             A tropical, barefoot paradise
@@ -103,18 +148,20 @@ export default function Homepage() {
             At one with the Palawan sun
           </h3>
           <p className="mt-4 max-w-2xl mx-auto text-gray-600">
-            Experience the pristine beaches, underground rivers, & breathtaking
-            landscapes of the world’s most beautiful island.
+            Experience the pristine beaches, underground rivers, & breathtaking landscapes of the world’s most beautiful island.
           </p>
-          <button className="mt-6 px-6 py-3 bg-white text-brand-blue rounded-full font-semibold shadow hover:bg-brand-blue hover:text-white transition">
-            <span className="flex items-center justify-center gap-2">
-              <FaClipboardCheck />
-              Check my booking
-            </span>
-          </button>
+          <a
+            href="/checkbooking"
+            className="mt-10 inline-flex items-center gap-2 px-6 py-3 bg-white text-brand-blue rounded-full font-semibold shadow hover:bg-brand-blue hover:text-white transition"
+            aria-label="Check my booking"
+          >
+            <FaClipboardCheck className="text-lg" />
+            <span>Check my booking</span>
+          </a>
+
         </section>
 
-        {/* Popular Packages */}
+        {/* Packages */}
         <section className="py-10 px-4">
           <h2 className="text-center text-brand-blue font-bold text-3xl">
             Our most popular <span className="text-brand-green">tour packages</span>
@@ -123,13 +170,32 @@ export default function Homepage() {
             Discover the best of Palawan with our carefully curated tour packages.
           </p>
 
+          <div className="mt-6 flex justify-center">
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="border border-gray-300 rounded-full px-5 py-2 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+            >
+              {locations.map((loc, i) => (
+                <option key={i} value={loc}>
+                  {loc === "All" ? "All Locations" : loc}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="mt-10 grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-            {packages.map((pkg, i) => (
-              <TourCard key={i} pkg={pkg} />
-            ))}
+            {filteredPackages.length > 0 ? (
+              filteredPackages.map((pkg, i) => <TourCard key={i} pkg={pkg} />)
+            ) : (
+              <p className="text-center text-gray-600 col-span-2">
+                No packages found for {selectedLocation}.
+              </p>
+            )}
           </div>
         </section>
-        
+    
+        {/* Reviews Section */}
         <ReviewsSection />
 
         {/* See the Sights Gallery */}
@@ -153,9 +219,9 @@ export default function Homepage() {
   );
 }
 
-/* ========== TOUR CARD ========== */
+//* ========== TOUR CARD ========== */
 const TourCard = ({ pkg }) => {
-  const [currentImg, setCurrentImg] = useState(1); // start at first real image
+  const [currentImg, setCurrentImg] = useState(1);
   const [isAnimating, setIsAnimating] = useState(false);
   const sliderRef = useRef(null);
 
@@ -180,10 +246,8 @@ const TourCard = ({ pkg }) => {
     }
   };
 
-  // Use transitionend instead of setTimeout for smoother looping
   useEffect(() => {
     const slider = sliderRef.current;
-
     const handleTransitionEnd = () => {
       setIsAnimating(false);
       if (currentImg === totalImages + 1) {
@@ -206,11 +270,12 @@ const TourCard = ({ pkg }) => {
     };
 
     slider.addEventListener("transitionend", handleTransitionEnd);
-    return () => slider.removeEventListener("transitionend", handleTransitionEnd);
+    return () =>
+      slider.removeEventListener("transitionend", handleTransitionEnd);
   }, [currentImg, totalImages]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden p-5 flex flex-col hover:shadow-lg transition-all">
+    <div className="relative bg-white rounded-2xl shadow-md overflow-hidden p-4 flex flex-col hover:shadow-lg transition-all">
       {/* Image Slider */}
       <div className="relative w-full h-56 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
         <div
@@ -229,7 +294,7 @@ const TourCard = ({ pkg }) => {
               <img
                 src={img}
                 alt={`${pkg.title} ${i}`}
-                className="object-contain w-full h-full"
+                className="object-cover w-full h-full"
               />
             </div>
           ))}
@@ -250,42 +315,74 @@ const TourCard = ({ pkg }) => {
         </button>
       </div>
 
-      {/* Info */}
+      {/* Header Info */}
       <div className="flex justify-between items-start mt-4 gap-3">
         <div className="flex-1">
           <h3 className="font-semibold text-lg text-gray-900 leading-snug">
             {pkg.title}
           </h3>
-          <p className="text-sm text-gray-500 mt-0.5">{pkg.days}</p>
+          <div className="flex items-center justify-between text-sm text-gray-500 mt-0.5">
+            <p>{pkg.days}</p>
+            <p className="absolute right-3">{pkg.subtitle}</p>
+          </div>
+          <p className="text-xs text-teal-600 mt-1 font-medium">
+            📍 {pkg.location}
+          </p>
         </div>
         <div className="text-right">
           <p className="text-teal-600 font-semibold text-lg leading-tight">
             ₱{pkg.price.toLocaleString()}{" "}
             <span className="text-sm text-gray-600">/ head</span>
           </p>
-          <button href="/booking" className="mt-2 px-5 py-1.5 bg-teal-500 text-white rounded-full font-semibold shadow hover:bg-teal-600 text-sm transition flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-              className="w-4 h-4 md:w-6 md:h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 12l14-7-7 14-2-5-5-2z"
-              />
-            </svg>
-            BOOK NOW
-          </button>
         </div>
       </div>
+
+      {/* Package Details */}
+      <div className="mt-4 space-y-4 pb-1"> {/* padding bottom to make room for button */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs">
+          <div>
+            <h4 className="font-bold text-gray-800 mb-2">Inclusions</h4>
+            <ul className="list-disc list-outside pl-4 text-gray-600">
+              {pkg.inclusions.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-gray-800 mb-2">Exclusions</h4>
+            <ul className="list-disc list-outside pl-4 text-gray-600">
+              {pkg.exclusions.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-gray-800 mb-2">Add-ons</h4>
+            <ul className="list-disc list-outside pl-4 text-gray-600">
+              {pkg.addons.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Book Now Button */}
+      <button
+        href="/booking"
+        className="absolute bottom-5 right-5 px-5 py-2.5 bg-blue-500 text-white rounded-full font-semibold shadow hover:bg-blue-600 text-sm transition flex items-center gap-2"
+      >
+        <FaClipboardCheck className="text-sm" />
+        BOOK NOW
+      </button>
     </div>
   );
 };
 
+
+/* ========== REVIEWS SECTION ========== */
 const ReviewsSection = () => {
   const reviews = [
     {
@@ -362,6 +459,14 @@ const GallerySection = () => {
       src: "https://images.unsplash.com/photo-1594485770512-f206820b7cc1",
       caption: "Local island village experience",
     },
+    {
+      src: "https://images.unsplash.com/photo-1538132787915-ff0a2f7e3c4a",
+      caption: "Turquoise lagoons and coral reefs",
+    },
+    {
+      src: "https://images.unsplash.com/photo-1605538032404-d7f061325b90?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      caption: "Secluded island picnic spot",
+    },
   ];
 
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -377,23 +482,29 @@ const GallerySection = () => {
   };
 
   return (
-    <section className="relative bg-brand-blue py-10 px-6 text-center overflow-hidden mb-10">
-      {/* Title */}
-      <h2 className="text-3xl font-bold text-white mb-10">See the Sights</h2>
+    <section className="relative bg-gradient-to-b from-[#EFE9DF] via-white to-[#EFE9DF] py-16 px-6 text-center overflow-hidden">
+      <h2 className="text-3xl font-bold text-brand-blue mb-4">See the Sights</h2>
+      <p className="text-gray-600 mb-10">
+        A glimpse of the breathtaking beauty you’ll experience in Palawan.
+      </p>
 
-      {/* Masonry-style Gallery */}
-      <div className="columns-2 md:columns-3 lg:columns-4 gap-4 max-w-6xl mx-auto space-y-4">
+      {/* Modern Masonry Grid */}
+      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-5 max-w-7xl mx-auto space-y-5">
         {images.map((img, i) => (
           <div
             key={i}
             onClick={() => setSelectedIndex(i)}
-            className="relative cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-transform duration-300 break-inside-avoid"
+            className="relative cursor-pointer overflow-hidden rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 group break-inside-avoid"
           >
             <img
               src={img.src}
               alt={img.caption}
-              className="w-full rounded-xl object-cover"
+              className="w-full rounded-2xl object-cover transition-transform duration-500 group-hover:scale-105"
             />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300"></div>
+            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/50 via-black/10 to-transparent text-white text-sm py-2 px-3 opacity-0 group-hover:opacity-100 transition-all duration-300 text-left">
+              {img.caption}
+            </div>
           </div>
         ))}
       </div>
@@ -402,24 +513,23 @@ const GallerySection = () => {
       <div className="mt-12">
         <a
           href="#"
-          className="inline-flex items-center gap-2 bg-brand-blue text-white font-semibold tracking-wide rounded-full hover:text-teal-300 transition-all duration-300"
+          className="inline-flex items-center gap-2 bg-teal-500 text-white font-semibold px-8 py-3 rounded-full shadow hover:bg-teal-600 transition-all"
         >
-          Check out the whole gallery →
+          View Full Gallery →
         </a>
       </div>
 
-      {/* Modal */}
+      {/* Modal (same functionality, better layout) */}
       <AnimatePresence>
         {selectedIndex !== null && (
           <motion.div
             onClick={() => setSelectedIndex(null)}
-            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="relative max-w-4xl w-full flex flex-col items-center p-4">
-              {/* Close */}
+            <div className="relative max-w-5xl w-full flex flex-col items-center">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -427,16 +537,15 @@ const GallerySection = () => {
                 }}
                 className="absolute top-4 right-4 text-white hover:text-gray-300"
               >
-                <X size={28} />
+                <X size={30} />
               </button>
 
-              {/* Image */}
               <AnimatePresence mode="wait">
                 <motion.img
                   key={images[selectedIndex].src}
                   src={images[selectedIndex].src}
                   alt={images[selectedIndex].caption}
-                  className="rounded-xl max-h-[80vh] object-contain"
+                  className="rounded-xl max-h-[80vh] object-contain shadow-lg"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.05 }}
@@ -444,8 +553,7 @@ const GallerySection = () => {
                 />
               </AnimatePresence>
 
-              {/* Caption */}
-              <p className="text-white text-center mt-4 text-lg font-medium">
+              <p className="text-white text-lg font-medium mt-4">
                 {images[selectedIndex].caption}
               </p>
 
@@ -453,15 +561,15 @@ const GallerySection = () => {
               <div className="absolute inset-y-0 flex justify-between items-center w-full px-6">
                 <button
                   onClick={prevImage}
-                  className="text-white bg-black/40 hover:bg-black/60 rounded-full p-2 transition"
+                  className="text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
                 >
-                  <ChevronLeft size={32} />
+                  <ChevronLeft size={36} />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="text-white bg-black/40 hover:bg-black/60 rounded-full p-2 transition"
+                  className="text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
                 >
-                  <ChevronRight size={32} />
+                  <ChevronRight size={36} />
                 </button>
               </div>
             </div>
@@ -471,6 +579,7 @@ const GallerySection = () => {
     </section>
   );
 };
+
 
 /* ========== FAQ SECTION ========== */
 const FAQSection = () => {

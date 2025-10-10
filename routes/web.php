@@ -46,6 +46,11 @@ Route::get('/gallery', function () {
     return Inertia::render('Gallery');
 })->middleware(['auth', 'verified'])->name('gallery');
 
+// CheckBooking
+Route::get('/checkbooking', function () {
+    return Inertia::render('CheckBooking');
+})->middleware(['auth', 'verified'])->name('checkbooking');
+
 // Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
